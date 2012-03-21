@@ -121,7 +121,7 @@ module ActiveMerchant
         access_request = build_access_request
         confirmation_request = build_confirmation_request(options)
         response = commit(:ship_confirm, save_request(access_request + confirmation_request), (options[:test] || false))
-        p response
+        parse_confirmation_response(response)
       end
 
       protected
@@ -474,22 +474,16 @@ module ActiveMerchant
         xml = REXML::Document.new(response)
         success = response_success?(xml)
         message = response_message(xml)
-
-
-
-        #first_shipment = xml.elements['/*/Shipment']
-        #first_package = first_shipment.elements['Package']
-        #tracking_number = first_shipment.get_text('ShipmentIdentificationNumber | Package/TrackingNumber').to_s
-
         options = {}
 
         if success
-          shipping_charges = xml.elements['/*/ShipmentCharges/TotalCharges']
-          options.update({total_cost: BigDecimal.new(shipping_charges.get_text('MonetaryValue').to_s)})
-
-
-          options.update({shipment_digest: xml.get_text('/*/ShipmentDigest').to_s})
-          options.update({shipment_identification_number: xml.get_text('/*/ShipmentIdentificationNumber').to_s})
+          options.update(
+            {
+              total_cost: BigDecimal.new(xml.get_text('/*/ShipmentCharges/TotalCharges/MonetaryValue').to_s),
+              shipment_digest: xml.get_text('/*/ShipmentDigest').to_s,
+              shipment_identification_number: xml.get_text('/*/ShipmentIdentificationNumber').to_s
+            }
+          )
         end
         ConfirmationResponse.new(success, message, Hash.from_xml(response).values.first, options)
       end

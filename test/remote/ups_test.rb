@@ -210,8 +210,9 @@ class UPSTest < Test::Unit::TestCase
     }
 
     assert_nothing_raised do
-      #response = @carrier.find_tracking_info('1Z12345E0291980793')
-      @carrier.get_confirmation(confirmation_options)
+      @confirmation_response = @carrier.get_confirmation(confirmation_options)
     end
+
+    assert_equal true, @confirmation_response.success?
   end
 end

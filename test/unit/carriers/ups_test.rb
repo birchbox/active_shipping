@@ -1,7 +1,6 @@
 require_relative '../../test_helper'
 
 class UPSTest < Test::Unit::TestCase
-
   def setup
     @packages = TestFixtures.packages
     @locations = TestFixtures.locations
@@ -11,6 +10,34 @@ class UPSTest < Test::Unit::TestCase
       :password => 'password'
     )
     @tracking_response = xml_fixture('ups/shipment_from_tiger_direct')
+
+    @confirmation_request_options = {
+      shipper: {
+        account_number: '123456',
+        name: 'Shipper',
+        phone_number: '4155555555',
+        email_address: 'shipper@example.com',
+        address: @locations[:real_google_as_commercial]
+      },
+
+      origin: {
+        company_name: 'Depot Company',
+        attention_name: 'Joe Blow',
+        phone_number: '4155556666',
+        address: @locations[:new_york]
+      },
+
+      destination: {
+        company_name: 'Recipient Co',
+        attention_name: 'Joan Blow',
+        phone_number: '4155553333',
+        address: @locations[:beverly_hills]
+      },
+
+      service_code: '02',
+
+      packages: [@packages[:wii]]
+    }
   end
 
   def remove_human_spaces_from_xml(xml)
@@ -91,37 +118,9 @@ class UPSTest < Test::Unit::TestCase
 
 
   def test_build_confirm_request
-    request_options = {
-      shipper: {
-        account_number: '123456',
-        name: 'Shipper',
-        phone_number: '4155555555',
-        email_address: 'shipper@example.com',
-        address: @locations[:real_google_as_commercial]
-      },
-
-      origin: {
-        company_name: 'Depot Company',
-        attention_name: 'Joe Blow',
-        phone_number: '4155556666',
-        address: @locations[:new_york]
-      },
-
-      destination: {
-        company_name: 'Recipient Co',
-        attention_name: 'Joan Blow',
-        phone_number: '4155553333',
-        address: @locations[:beverly_hills]
-      },
-
-      service_code: '02',
-
-      packages: [@packages[:wii]]
-    }
-
     confirm_request = remove_human_spaces_from_xml(xml_fixture('ups/shipment_confirm_request'))
 
-    assert_equal confirm_request, @carrier.send(:build_confirmation_request, request_options)
+    assert_equal confirm_request, @carrier.send(:build_confirmation_request, @confirmation_request_options)
   end
 
   def test_parse_confirmation_response
@@ -137,14 +136,10 @@ class UPSTest < Test::Unit::TestCase
   end
 
   def test_shipment_confirm_request_should_return_a_response
-    #@carrier.expects(:commit).returns(@confirm_response)
-    #origin
-    #destination
-    #packages
-    #service
-    #p @packages[:wii]
+    @carrier.expects(:commit).returns(xml_fixture('ups/shipment_confirm_response_real'))
 
-    #assert_equal 'ActiveMerchant::Shipping::ConfirmResponse', @carrier.confirm_shipping().class.name
+    confirmation_response = @carrier.get_confirmation(@confirmation_request_options)
+    assert_equal 'ActiveMerchant::Shipping::ConfirmationResponse', confirmation_response.class.name
+    assert_equal true, confirmation_response.success?
   end
-
 end
