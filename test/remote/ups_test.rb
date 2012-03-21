@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative '../test_helper'
 
 class UPSTest < Test::Unit::TestCase
   
@@ -176,5 +176,42 @@ class UPSTest < Test::Unit::TestCase
 
     assert_not_equal prices_of.call(:fake_home_as_residential), prices_of.call(:fake_home_as_commercial)
     assert_not_equal prices_of.call(:fake_google_as_commercial), prices_of.call(:fake_google_as_residential)
+  end
+
+  def test_confirmation
+    account_number = fixtures(:ups)[:account]
+
+    confirmation_options = {
+      shipper: {
+        account_number: account_number,
+        name: 'Shipper',
+        phone_number: '4155555555',
+        email_address: 'shipper@example.com',
+        address: @locations[:real_google_as_commercial]
+      },
+
+      origin: {
+        company_name: 'Depot Company',
+        attention_name: 'Joe Blow',
+        phone_number: '4155556666',
+        address: @locations[:new_york]
+      },
+
+      destination: {
+        company_name: 'Recipient Co',
+        attention_name: 'Joan Blow',
+        phone_number: '4155553333',
+        address: @locations[:beverly_hills]
+      },
+
+      service_code: '02',
+
+      packages: [@packages[:wii]]
+    }
+
+    assert_nothing_raised do
+      #response = @carrier.find_tracking_info('1Z12345E0291980793')
+      @carrier.get_confirmation(confirmation_options)
+    end
   end
 end

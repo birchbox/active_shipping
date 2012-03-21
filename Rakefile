@@ -28,4 +28,3 @@ task :default => 'test:units'
 
 desc "Run the unit and remote tests"
 task :test => ['test:units','test:remote']
-```
