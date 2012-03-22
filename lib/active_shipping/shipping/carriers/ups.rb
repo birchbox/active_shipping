@@ -130,7 +130,7 @@ module ActiveMerchant
         access_request = build_access_request
         acceptance_request = build_acceptance_request(options)
         response = commit(:ship_accept, save_request(access_request + acceptance_request), (options[:test] || false))
-        p response
+        parse_acceptance_response(response)
       end
 
       protected
@@ -402,6 +402,7 @@ module ActiveMerchant
         end
         xml_request.to_s
       end
+
       def parse_rate_response(origin, destination, packages, response, options={})
         rates = []
 
@@ -507,6 +508,34 @@ module ActiveMerchant
         ConfirmationResponse.new(success, message, Hash.from_xml(response).values.first, options)
       end
 
+      def parse_acceptance_response(response)
+        xml = REXML::Document.new(response)
+        success = response_success?(xml)
+        message = response_message(xml)
+        options = {}
+
+        if success
+          packages = []
+
+          xml.elements.each('/*/ShipmentResults/PackageResults') do |package|
+            packages << {
+              tracking_number: package.get_text('TrackingNumber').to_s,
+              image_data: Base64.decode64(package.get_text('LabelImage/GraphicImage').to_s)
+            }
+          end
+
+          options.update(
+            {
+              total_cost: BigDecimal.new(xml.get_text('/*/ShipmentResults/ShipmentCharges/TotalCharges/MonetaryValue').to_s),
+              shipment_identification_number: xml.get_text('/*/ShipmentResults/ShipmentIdentificationNumber').to_s,
+              packages: packages
+            }
+          )
+        end
+
+        AcceptanceResponse.new(success, message, Hash.from_xml(response).values.first, options)
+      end
+
       def location_from_address_node(address)
         return nil unless address
         Location.new(
@@ -532,7 +561,6 @@ module ActiveMerchant
         ssl_post("#{test ? TEST_URL : LIVE_URL}/#{RESOURCES[action]}", request)
       end
 
-
       def service_name_for(origin, code)
         origin = origin.country_code(:alpha2)
 
@@ -548,7 +576,6 @@ module ActiveMerchant
         name ||= OTHER_NON_US_ORIGIN_SERVICES[code] unless name == 'US'
         name ||= DEFAULT_SERVICES[code]
       end
-
     end
   end
 end

@@ -185,7 +185,9 @@ module ActiveMerchant
           :postal_code => '6011')
       }
 
-      def self.confirmation_request_options(account_number = '123456')
+      def self.confirmation_request_options(account_number = '123456', packages = nil)
+        packages ||= [@@packages[:wii]]
+
         {
           shipper: {
             account_number: account_number,
@@ -211,7 +213,7 @@ module ActiveMerchant
 
           service_code: '02',
 
-          packages: [@@packages[:wii]]
+          packages: packages
         }
       end
 

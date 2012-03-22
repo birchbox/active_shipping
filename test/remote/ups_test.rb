@@ -192,17 +192,17 @@ class UPSTest < Test::Unit::TestCase
 
   def test_acceptance
     account_number = fixtures(:ups)[:account]
-    confirmation_options = TestFixtures.confirmation_request_options account_number
+    packages = [@packages[:wii], @packages[:chocolate_stuff]]
+
+    confirmation_options = TestFixtures.confirmation_request_options account_number, packages
 
     confirmation_response = @carrier.get_confirmation(confirmation_options)
-    acceptance_options = TestFixtures.acceptance_request_options.update({
-                                                                          shipment_digest: confirmation_response.shipment_digest
-                                                                        })
+    acceptance_options = TestFixtures.acceptance_request_options.update({shipment_digest: confirmation_response.shipment_digest})
 
     assert_nothing_raised do
       @acceptance_response = @carrier.get_acceptance(acceptance_options)
     end
 
-    assert_equal true, @acceptance_response.request
+    assert_equal true, @acceptance_response.success?
   end
 end

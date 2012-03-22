@@ -5,5 +5,4 @@ sample.rb
 pkg
 .dotest
 Gemfile.lock
-test/fixtures.yml
 *.idea
