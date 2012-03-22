@@ -15,7 +15,8 @@ module ActiveMerchant
       RESOURCES = {
         :rates => 'ups.app/xml/Rate',
         :track => 'ups.app/xml/Track',
-        :ship_confirm => 'ups.app/xml/ShipConfirm'
+        :ship_confirm => 'ups.app/xml/ShipConfirm',
+        :ship_accept => 'ups.app/xml/ShipAccept'
       }
 
       PICKUP_CODES = HashWithIndifferentAccess.new({
@@ -122,6 +123,14 @@ module ActiveMerchant
         confirmation_request = build_confirmation_request(options)
         response = commit(:ship_confirm, save_request(access_request + confirmation_request), (options[:test] || false))
         parse_confirmation_response(response)
+      end
+
+      def get_acceptance(options)
+        options = @options.update(options)
+        access_request = build_access_request
+        acceptance_request = build_acceptance_request(options)
+        response = commit(:ship_accept, save_request(access_request + acceptance_request), (options[:test] || false))
+        p response
       end
 
       protected
@@ -383,6 +392,16 @@ module ActiveMerchant
         xml_request.to_s
       end
 
+      def build_acceptance_request(options)
+        xml_request = XmlNode.new('ShipmentAcceptRequest') do |root_node|
+          root_node << XmlNode.new('Request') do |request|
+            request << XmlNode.new('RequestAction', 'ShipAccept')
+          end
+
+          root_node << XmlNode.new('ShipmentDigest', options[:shipment_digest])
+        end
+        xml_request.to_s
+      end
       def parse_rate_response(origin, destination, packages, response, options={})
         rates = []
 

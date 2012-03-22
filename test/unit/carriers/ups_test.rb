@@ -11,33 +11,8 @@ class UPSTest < Test::Unit::TestCase
     )
     @tracking_response = xml_fixture('ups/shipment_from_tiger_direct')
 
-    @confirmation_request_options = {
-      shipper: {
-        account_number: '123456',
-        name: 'Shipper',
-        phone_number: '4155555555',
-        email_address: 'shipper@example.com',
-        address: @locations[:real_google_as_commercial]
-      },
-
-      origin: {
-        company_name: 'Depot Company',
-        attention_name: 'Joe Blow',
-        phone_number: '4155556666',
-        address: @locations[:new_york]
-      },
-
-      destination: {
-        company_name: 'Recipient Co',
-        attention_name: 'Joan Blow',
-        phone_number: '4155553333',
-        address: @locations[:beverly_hills]
-      },
-
-      service_code: '02',
-
-      packages: [@packages[:wii]]
-    }
+    @confirmation_request_options = TestFixtures.confirmation_request_options
+    @acceptance_request_options = TestFixtures.acceptance_request_options
   end
 
   def remove_human_spaces_from_xml(xml)
@@ -117,10 +92,9 @@ class UPSTest < Test::Unit::TestCase
   end
 
 
-  def test_build_confirm_request
-    confirm_request = remove_human_spaces_from_xml(xml_fixture('ups/shipment_confirm_request'))
-
-    assert_equal confirm_request, @carrier.send(:build_confirmation_request, @confirmation_request_options)
+  def test_build_confirmation_request
+    confirmation_request = remove_human_spaces_from_xml(xml_fixture('ups/shipment_confirm_request'))
+    assert_equal confirmation_request, @carrier.send(:build_confirmation_request, @confirmation_request_options)
   end
 
   def test_parse_confirmation_response
@@ -141,5 +115,10 @@ class UPSTest < Test::Unit::TestCase
     confirmation_response = @carrier.get_confirmation(@confirmation_request_options)
     assert_equal 'ActiveMerchant::Shipping::ConfirmationResponse', confirmation_response.class.name
     assert_equal true, confirmation_response.success?
+  end
+
+  def test_build_acceptance_request
+    acceptance_request = remove_human_spaces_from_xml(xml_fixture('ups/shipment_accept_request'))
+    assert_equal acceptance_request, @carrier.send(:build_acceptance_request, @acceptance_request_options)
   end
 end
