@@ -200,7 +200,7 @@ class UPSTest < Test::Unit::TestCase
     acceptance_options = TestFixtures.acceptance_request_options.update({shipment_digest: confirmation_response.shipment_digest})
 
     assert_nothing_raised do
-      @acceptance_response = @carrier.get_acceptance(acceptance_options)
+      @acceptance_response = @carrier.get_acceptance_response(acceptance_options)
     end
 
     assert_equal true, @acceptance_response.success?
