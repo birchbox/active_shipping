@@ -113,7 +113,7 @@ class UPSTest < Test::Unit::TestCase
   def test_shipment_confirm_request_should_return_a_response
     @carrier.expects(:commit).returns(xml_fixture('ups/shipment_confirm_response_real'))
 
-    confirmation_response = @carrier.get_confirmation(@confirmation_request_options)
+    confirmation_response = @carrier.get_confirmation_response(@confirmation_request_options)
     assert_equal 'ActiveMerchant::Shipping::ConfirmationResponse', confirmation_response.class.name
     assert_equal true, confirmation_response.success?
   end

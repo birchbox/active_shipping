@@ -117,7 +117,7 @@ module ActiveMerchant
         parse_tracking_response(response, options)
       end
 
-      def get_confirmation(options)
+      def get_confirmation_response(options)
         options = @options.update(options)
         access_request = build_access_request
         confirmation_request = build_confirmation_request(options)
@@ -125,7 +125,7 @@ module ActiveMerchant
         parse_confirmation_response(response)
       end
 
-      def get_acceptance(options)
+      def get_acceptance_response(options)
         options = @options.update(options)
         access_request = build_access_request
         acceptance_request = build_acceptance_request(options)

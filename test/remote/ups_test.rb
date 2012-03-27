@@ -184,7 +184,7 @@ class UPSTest < Test::Unit::TestCase
     confirmation_options = TestFixtures.confirmation_request_options account_number
 
     assert_nothing_raised do
-      @confirmation_response = @carrier.get_confirmation(confirmation_options)
+      @confirmation_response = @carrier.get_confirmation_response(confirmation_options)
     end
 
     assert_equal true, @confirmation_response.success?
@@ -196,7 +196,7 @@ class UPSTest < Test::Unit::TestCase
 
     confirmation_options = TestFixtures.confirmation_request_options account_number, packages
 
-    confirmation_response = @carrier.get_confirmation(confirmation_options)
+    confirmation_response = @carrier.get_confirmation_response(confirmation_options)
     acceptance_options = TestFixtures.acceptance_request_options.update({shipment_digest: confirmation_response.shipment_digest})
 
     assert_nothing_raised do
