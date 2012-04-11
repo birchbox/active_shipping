@@ -204,5 +204,21 @@ class UPSTest < Test::Unit::TestCase
     end
 
     assert_equal true, @acceptance_response.success?
+    assert_nil @acceptance_response.high_value_report
+  end
+
+  def test_acceptance_with_hvr
+    account_number = fixtures(:ups)[:account]
+    packages = [@packages[:expensive_wii]]
+
+    confirmation_options = TestFixtures.confirmation_request_options account_number, packages
+    confirmation_response = @carrier.get_confirmation_response(confirmation_options)
+    acceptance_options = TestFixtures.acceptance_request_options.update({shipment_digest: confirmation_response.shipment_digest})
+
+    assert_nothing_raised do
+      @acceptance_response = @carrier.get_acceptance_response(acceptance_options)
+    end
+    assert_equal true, @acceptance_response.success?
+    assert_not_nil @acceptance_response.high_value_report
   end
 end

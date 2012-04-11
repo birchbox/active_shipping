@@ -4,6 +4,7 @@ class AcceptanceResponseTest < Test::Unit::TestCase
   def setup
     @carrier = UPS.new(fixtures(:ups).merge(:test => true))
     @acceptance_response = @carrier.send(:parse_acceptance_response, xml_fixture('ups/shipment_accept_response_real'))
+    @acceptance_response_high_value = @carrier.send(:parse_acceptance_response, xml_fixture('ups/shipment_accept_response_real_high_value'))
   end
 
   def test_save_image_file
@@ -26,5 +27,15 @@ class AcceptanceResponseTest < Test::Unit::TestCase
       @acceptance_response.save_image_for_package_with_tracking_number 'INVALID', file_path_1
     end
     assert_equal 'Invalid Tracking Number', error.message
+  end
+
+  def test_save_high_value_report
+    file_path = '/tmp/test_save_hvr.html'
+    @acceptance_response_high_value.save_high_value_report_for_shipment file_path
+
+    file_contents = open(file_path, 'rb') { |io| io.read }
+    assert_equal file_contents, @acceptance_response_high_value.high_value_report
+
+    File.delete file_path
   end
 end

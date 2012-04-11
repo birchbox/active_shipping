@@ -2,12 +2,13 @@ module ActiveMerchant #:nodoc:
   module Shipping
 
     class AcceptanceResponse < Response
-      attr_reader :total_cost, :shipment_identification_number, :packages
+      attr_reader :total_cost, :shipment_identification_number, :packages, :high_value_report
 
       def initialize(success, message, params = {}, options = {})
         @total_cost = options[:total_cost]
         @shipment_identification_number = options[:shipment_identification_number]
         @packages = options[:packages]
+        @high_value_report = (options[:high_value_report].empty?)? nil : options[:high_value_report]
         super
       end
 
@@ -22,6 +23,15 @@ module ActiveMerchant #:nodoc:
         end
       end
 
+      def save_high_value_report_for_shipment file_path
+        if @high_value_report
+          File.open(file_path, 'wb') do |file|
+            file.write(@high_value_report)
+          end
+        else
+          raise 'Package did not generate a high value report'
+        end
+      end
     end
   end
 end

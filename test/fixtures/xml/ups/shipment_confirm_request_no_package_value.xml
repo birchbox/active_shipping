@@ -71,12 +71,6 @@
         <Height>4.5</Height>
         <Width>10</Width>
       </Dimensions>
-      <PackageServiceOptions>
-        <InsuredValue>
-          <CurrencyCode>USD</CurrencyCode>
-          <MonetaryValue>269.99</MonetaryValue>
-        </InsuredValue>
-      </PackageServiceOptions>
     </Package>
   </Shipment>
   <LabelSpecification>

@@ -13,26 +13,26 @@ module ActiveMerchant
       LIVE_URL = 'https://onlinetools.ups.com'
 
       RESOURCES = {
-        :rates => 'ups.app/xml/Rate',
-        :track => 'ups.app/xml/Track',
-        :ship_confirm => 'ups.app/xml/ShipConfirm',
-        :ship_accept => 'ups.app/xml/ShipAccept'
+            :rates => 'ups.app/xml/Rate',
+            :track => 'ups.app/xml/Track',
+            :ship_confirm => 'ups.app/xml/ShipConfirm',
+            :ship_accept => 'ups.app/xml/ShipAccept'
       }
 
       PICKUP_CODES = HashWithIndifferentAccess.new({
-                                                     :daily_pickup => "01",
-                                                     :customer_counter => "03",
-                                                     :one_time_pickup => "06",
-                                                     :on_call_air => "07",
-                                                     :suggested_retail_rates => "11",
-                                                     :letter_center => "19",
-                                                     :air_service_center => "20"
+                                                         :daily_pickup => "01",
+                                                         :customer_counter => "03",
+                                                         :one_time_pickup => "06",
+                                                         :on_call_air => "07",
+                                                         :suggested_retail_rates => "11",
+                                                         :letter_center => "19",
+                                                         :air_service_center => "20"
                                                    })
 
       CUSTOMER_CLASSIFICATIONS = HashWithIndifferentAccess.new({
-                                                                 :wholesale => "01",
-                                                                 :occasional => "03",
-                                                                 :retail => "04"
+                                                                     :wholesale => "01",
+                                                                     :occasional => "03",
+                                                                     :retail => "04"
                                                                })
 
       # these are the defaults described in the UPS API docs,
@@ -50,44 +50,44 @@ module ActiveMerchant
       end
 
       DEFAULT_SERVICES = {
-        "01" => "UPS Next Day Air",
-        "02" => "UPS Second Day Air",
-        "03" => "UPS Ground",
-        "07" => "UPS Worldwide Express",
-        "08" => "UPS Worldwide Expedited",
-        "11" => "UPS Standard",
-        "12" => "UPS Three-Day Select",
-        "13" => "UPS Next Day Air Saver",
-        "14" => "UPS Next Day Air Early A.M.",
-        "54" => "UPS Worldwide Express Plus",
-        "59" => "UPS Second Day Air A.M.",
-        "65" => "UPS Saver",
-        "82" => "UPS Today Standard",
-        "83" => "UPS Today Dedicated Courier",
-        "84" => "UPS Today Intercity",
-        "85" => "UPS Today Express",
-        "86" => "UPS Today Express Saver"
+            "01" => "UPS Next Day Air",
+            "02" => "UPS Second Day Air",
+            "03" => "UPS Ground",
+            "07" => "UPS Worldwide Express",
+            "08" => "UPS Worldwide Expedited",
+            "11" => "UPS Standard",
+            "12" => "UPS Three-Day Select",
+            "13" => "UPS Next Day Air Saver",
+            "14" => "UPS Next Day Air Early A.M.",
+            "54" => "UPS Worldwide Express Plus",
+            "59" => "UPS Second Day Air A.M.",
+            "65" => "UPS Saver",
+            "82" => "UPS Today Standard",
+            "83" => "UPS Today Dedicated Courier",
+            "84" => "UPS Today Intercity",
+            "85" => "UPS Today Express",
+            "86" => "UPS Today Express Saver"
       }
 
       CANADA_ORIGIN_SERVICES = {
-        "01" => "UPS Express",
-        "02" => "UPS Expedited",
-        "14" => "UPS Express Early A.M."
+            "01" => "UPS Express",
+            "02" => "UPS Expedited",
+            "14" => "UPS Express Early A.M."
       }
 
       MEXICO_ORIGIN_SERVICES = {
-        "07" => "UPS Express",
-        "08" => "UPS Expedited",
-        "54" => "UPS Express Plus"
+            "07" => "UPS Express",
+            "08" => "UPS Expedited",
+            "54" => "UPS Express Plus"
       }
 
       EU_ORIGIN_SERVICES = {
-        "07" => "UPS Express",
-        "08" => "UPS Expedited"
+            "07" => "UPS Express",
+            "08" => "UPS Expedited"
       }
 
       OTHER_NON_US_ORIGIN_SERVICES = {
-        "07" => "UPS Express"
+            "07" => "UPS Express"
       }
 
       # From http://en.wikipedia.org/w/index.php?title=European_Union&oldid=174718707 (Current as of November 30, 2007)
@@ -375,6 +375,15 @@ module ActiveMerchant
                   dimensions << XmlNode.new('Height', package.inches(:height))
                   dimensions << XmlNode.new('Width', package.in(:width))
                 end
+                if package.value
+                  package_node << XmlNode.new('PackageServiceOptions') do |package_service_options|
+                    package_service_options << XmlNode.new('InsuredValue') do |insured_value|
+                      insured_value << XmlNode.new('CurrencyCode', 'USD')
+                      value = (BigDecimal.new(package.value.to_s) / 100).round(2).to_s('F')
+                      insured_value << XmlNode.new('MonetaryValue', value)
+                    end
+                  end
+                end
               end
             end
           end
@@ -452,7 +461,7 @@ module ActiveMerchant
             shipment_events = activities.map do |activity|
               description = activity.get_text('Status/StatusType/Description').to_s
               zoneless_time = if (time = activity.get_text('Time')) &&
-                (date = activity.get_text('Date'))
+                    (date = activity.get_text('Date'))
                 time, date = time.to_s, date.to_s
                 hour, minute, second = time.scan(/\d{2}/)
                 year, month, day = date[0..3], date[4..5], date[6..7]
@@ -498,11 +507,11 @@ module ActiveMerchant
 
         if success
           options.update(
-            {
-              total_cost: BigDecimal.new(xml.get_text('/*/ShipmentCharges/TotalCharges/MonetaryValue').to_s),
-              shipment_digest: xml.get_text('/*/ShipmentDigest').to_s,
-              shipment_identification_number: xml.get_text('/*/ShipmentIdentificationNumber').to_s
-            }
+                {
+                      total_cost: BigDecimal.new(xml.get_text('/*/ShipmentCharges/TotalCharges/MonetaryValue').to_s),
+                      shipment_digest: xml.get_text('/*/ShipmentDigest').to_s,
+                      shipment_identification_number: xml.get_text('/*/ShipmentIdentificationNumber').to_s
+                }
           )
         end
         ConfirmationResponse.new(success, message, Hash.from_xml(response).values.first, options)
@@ -519,17 +528,18 @@ module ActiveMerchant
 
           xml.elements.each('/*/ShipmentResults/PackageResults') do |package|
             packages << {
-              tracking_number: package.get_text('TrackingNumber').to_s,
-              image_data: Base64.decode64(package.get_text('LabelImage/GraphicImage').to_s)
+                  tracking_number: package.get_text('TrackingNumber').to_s,
+                  image_data: Base64.decode64(package.get_text('LabelImage/GraphicImage').to_s)
             }
           end
 
           options.update(
-            {
-              total_cost: BigDecimal.new(xml.get_text('/*/ShipmentResults/ShipmentCharges/TotalCharges/MonetaryValue').to_s),
-              shipment_identification_number: xml.get_text('/*/ShipmentResults/ShipmentIdentificationNumber').to_s,
-              packages: packages
-            }
+                {
+                      total_cost: BigDecimal.new(xml.get_text('/*/ShipmentResults/ShipmentCharges/TotalCharges/MonetaryValue').to_s),
+                      shipment_identification_number: xml.get_text('/*/ShipmentResults/ShipmentIdentificationNumber').to_s,
+                      high_value_report: Base64.decode64(xml.get_text('/*/ShipmentResults/ControlLogReceipt/GraphicImage').to_s),
+                      packages: packages
+                }
           )
         end
 
@@ -539,13 +549,13 @@ module ActiveMerchant
       def location_from_address_node(address)
         return nil unless address
         Location.new(
-          :country => node_text_or_nil(address.elements['CountryCode']),
-          :postal_code => node_text_or_nil(address.elements['PostalCode']),
-          :province => node_text_or_nil(address.elements['StateProvinceCode']),
-          :city => node_text_or_nil(address.elements['City']),
-          :address1 => node_text_or_nil(address.elements['AddressLine1']),
-          :address2 => node_text_or_nil(address.elements['AddressLine2']),
-          :address3 => node_text_or_nil(address.elements['AddressLine3'])
+              :country => node_text_or_nil(address.elements['CountryCode']),
+              :postal_code => node_text_or_nil(address.elements['PostalCode']),
+              :province => node_text_or_nil(address.elements['StateProvinceCode']),
+              :city => node_text_or_nil(address.elements['City']),
+              :address1 => node_text_or_nil(address.elements['AddressLine1']),
+              :address2 => node_text_or_nil(address.elements['AddressLine2']),
+              :address3 => node_text_or_nil(address.elements['AddressLine3'])
         )
       end
 
