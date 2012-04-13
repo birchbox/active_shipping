@@ -1,0 +1,6 @@
+<VoidShipmentRequest>
+  <Request>
+    <RequestAction>Void</RequestAction>
+  </Request>
+  <ShipmentIdentificationNumber>1Z12345E2318693258</ShipmentIdentificationNumber>
+</VoidShipmentRequest>

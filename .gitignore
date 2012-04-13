@@ -6,3 +6,4 @@ pkg
 .dotest
 Gemfile.lock
 *.idea
+test/fixtures.yml

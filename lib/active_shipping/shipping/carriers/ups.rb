@@ -16,7 +16,8 @@ module ActiveMerchant
             :rates => 'ups.app/xml/Rate',
             :track => 'ups.app/xml/Track',
             :ship_confirm => 'ups.app/xml/ShipConfirm',
-            :ship_accept => 'ups.app/xml/ShipAccept'
+            :ship_accept => 'ups.app/xml/ShipAccept',
+            :ship_void => 'ups.app/xml/Void'
       }
 
       PICKUP_CODES = HashWithIndifferentAccess.new({
@@ -95,6 +96,7 @@ module ActiveMerchant
 
       US_TERRITORIES_TREATED_AS_COUNTRIES = ["AS", "FM", "GU", "MH", "MP", "PW", "PR", "VI"]
 
+
       def requirements
         [:key, :login, :password]
       end
@@ -133,6 +135,14 @@ module ActiveMerchant
         parse_acceptance_response(response)
       end
 
+      def get_unparsed_void_response(options)
+        options = @options.update(options)
+        access_request = build_access_request
+        void_request = build_void_request(options)
+        response = commit(:ship_void, save_request(access_request + void_request), (options[:test] || false))
+        puts @last_request
+        response
+      end
       protected
 
       def upsified_location(location)
@@ -408,6 +418,25 @@ module ActiveMerchant
           end
 
           root_node << XmlNode.new('ShipmentDigest', options[:shipment_digest])
+        end
+        xml_request.to_s
+      end
+
+      def build_void_request(options)
+        xml_request = XmlNode.new('VoidShipmentRequest') do |root_node|
+          root_node << XmlNode.new('Request') do |request|
+            request << XmlNode.new('RequestAction', 'Void')
+          end
+          if options[:tracking_numbers]
+            root_node << XmlNode.new('ExpandedVoidShipment') do |expanded_node|
+              expanded_node << XmlNode.new('ShipmentIdentificationNumber', options[:shipment_identification_number])
+                options[:tracking_numbers].each do |tracking_number|
+                  expanded_node << XmlNode.new('TrackingNumber', tracking_number)
+                end
+              end
+          elsif
+            root_node << XmlNode.new('ShipmentIdentificationNumber', options[:shipment_identification_number])
+          end
         end
         xml_request.to_s
       end

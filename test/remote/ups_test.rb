@@ -30,10 +30,10 @@ class UPSTest < Test::Unit::TestCase
     response = nil
     assert_nothing_raised do
       response = @carrier.find_rates(
-        @locations[:beverly_hills],
-        @locations[:london],
-        @packages.values_at(:big_half_pound),
-        :test => true
+            @locations[:beverly_hills],
+            @locations[:london],
+            @packages.values_at(:big_half_pound),
+            :test => true
       )
     end
   end
@@ -42,19 +42,19 @@ class UPSTest < Test::Unit::TestCase
     response = nil
     assert_nothing_raised do
       response = @carrier.find_rates(
-        @locations[:beverly_hills],
-        Location.new(:city => 'Ponce', :country => 'US', :state => 'PR', :zip => '00733-1283'),
-        @packages.values_at(:big_half_pound),
-        :test => true
+            @locations[:beverly_hills],
+            Location.new(:city => 'Ponce', :country => 'US', :state => 'PR', :zip => '00733-1283'),
+            @packages.values_at(:big_half_pound),
+            :test => true
       )
     end
   end
 
   def test_just_country_given
     response = @carrier.find_rates(
-      @locations[:beverly_hills],
-      Location.new(:country => 'CA'),
-      Package.new(100, [5, 10, 20])
+          @locations[:beverly_hills],
+          Location.new(:country => 'CA'),
+          Package.new(100, [5, 10, 20])
     )
     assert_not_equal [], response.rates
   end
@@ -63,10 +63,10 @@ class UPSTest < Test::Unit::TestCase
     response = nil
     assert_nothing_raised do
       response = @carrier.find_rates(
-        @locations[:ottawa],
-        @locations[:beverly_hills],
-        @packages.values_at(:book, :wii),
-        :test => true
+            @locations[:ottawa],
+            @locations[:beverly_hills],
+            @packages.values_at(:book, :wii),
+            :test => true
       )
     end
 
@@ -95,10 +95,10 @@ class UPSTest < Test::Unit::TestCase
   def test_ottawa_to_us_fails_without_zip
     assert_raises ResponseError do
       @carrier.find_rates(
-        @locations[:ottawa],
-        Location.new(:country => 'US'),
-        @packages.values_at(:book, :wii),
-        :test => true
+            @locations[:ottawa],
+            Location.new(:country => 'US'),
+            @packages.values_at(:book, :wii),
+            :test => true
       )
     end
   end
@@ -106,10 +106,10 @@ class UPSTest < Test::Unit::TestCase
   def test_ottawa_to_us_succeeds_with_only_zip
     assert_nothing_raised do
       @carrier.find_rates(
-        @locations[:ottawa],
-        Location.new(:country => 'US', :zip => 90210),
-        @packages.values_at(:book, :wii),
-        :test => true
+            @locations[:ottawa],
+            Location.new(:country => 'US', :zip => 90210),
+            @packages.values_at(:book, :wii),
+            :test => true
       )
     end
   end
@@ -117,18 +117,18 @@ class UPSTest < Test::Unit::TestCase
   def test_us_to_uk_with_different_pickup_types
     assert_nothing_raised do
       daily_response = @carrier.find_rates(
-        @locations[:beverly_hills],
-        @locations[:london],
-        @packages.values_at(:book, :wii),
-        :pickup_type => :daily_pickup,
-        :test => true
+            @locations[:beverly_hills],
+            @locations[:london],
+            @packages.values_at(:book, :wii),
+            :pickup_type => :daily_pickup,
+            :test => true
       )
       one_time_response = @carrier.find_rates(
-        @locations[:beverly_hills],
-        @locations[:london],
-        @packages.values_at(:book, :wii),
-        :pickup_type => :one_time_pickup,
-        :test => true
+            @locations[:beverly_hills],
+            @locations[:london],
+            @packages.values_at(:book, :wii),
+            :pickup_type => :one_time_pickup,
+            :test => true
       )
       assert_not_equal daily_response.rates.map(&:price), one_time_response.rates.map(&:price)
     end
@@ -139,19 +139,19 @@ class UPSTest < Test::Unit::TestCase
     p = Package.new(0, 0)
     assert_nothing_raised do
       response = @carrier.find_rates(
-        @locations[:beverly_hills], # imperial (U.S. origin)
-        @locations[:ottawa],
-        p,
-        :test => true
+            @locations[:beverly_hills], # imperial (U.S. origin)
+            @locations[:ottawa],
+            p,
+            :test => true
       )
     end
     assert response.success?, response.message
     assert_nothing_raised do
       response = @carrier.find_rates(
-        @locations[:ottawa],
-        @locations[:beverly_hills], # metric
-        p,
-        :test => true
+            @locations[:ottawa],
+            @locations[:beverly_hills], # metric
+            p,
+            :test => true
       )
     end
     assert response.success?, response.message
@@ -160,15 +160,15 @@ class UPSTest < Test::Unit::TestCase
   def test_different_rates_based_on_address_type
     responses = {}
     locations = [
-      :fake_home_as_residential, :fake_home_as_commercial,
-      :fake_google_as_residential, :fake_google_as_commercial
+          :fake_home_as_residential, :fake_home_as_commercial,
+          :fake_google_as_residential, :fake_google_as_commercial
     ]
 
     locations.each do |location|
       responses[location] = @carrier.find_rates(
-        @locations[:beverly_hills],
-        @locations[location],
-        @packages.values_at(:chocolate_stuff)
+            @locations[:beverly_hills],
+            @locations[location],
+            @packages.values_at(:chocolate_stuff)
       )
     end
 
@@ -220,5 +220,15 @@ class UPSTest < Test::Unit::TestCase
     end
     assert_equal true, @acceptance_response.success?
     assert_not_nil @acceptance_response.high_value_report
+  end
+
+  def test_void
+    void_request_options = TestFixtures.void_request_options[:condensed]
+
+    void_response = @carrier.get_unparsed_void_response(void_request_options)
+    p void_response
+
+    xml = REXML::Document.new(void_response)
+    assert_equal '1', xml.get_text('/*/Response/ResponseStatusCode').to_s
   end
 end
