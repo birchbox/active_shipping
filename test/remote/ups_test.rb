@@ -226,7 +226,6 @@ class UPSTest < Test::Unit::TestCase
     void_request_options = TestFixtures.void_request_options[:condensed]
 
     void_response = @carrier.get_unparsed_void_response(void_request_options)
-    p void_response
 
     xml = REXML::Document.new(void_response)
     assert_equal '1', xml.get_text('/*/Response/ResponseStatusCode').to_s

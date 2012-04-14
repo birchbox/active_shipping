@@ -226,7 +226,7 @@ module ActiveMerchant
       def self.void_request_options
         {condensed:
                {
-                     shipment_identification_number: '1Z12345E2318693258'
+                     shipment_identification_number: '1Z12345E0390817264'
                },
          expanded:
                {

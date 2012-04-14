@@ -139,8 +139,8 @@ module ActiveMerchant
         options = @options.update(options)
         access_request = build_access_request
         void_request = build_void_request(options)
-        response = commit(:ship_void, save_request(access_request + void_request), (options[:test] || false))
-        puts @last_request
+        request = "<?xml version='1.0'?>#{access_request}<?xml version='1.0'?>#{void_request}"
+        response = commit(:ship_void, save_request(request), (options[:test] || false))
         response
       end
       protected
