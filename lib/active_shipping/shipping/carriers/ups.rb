@@ -143,6 +143,7 @@ module ActiveMerchant
         response = commit(:ship_void, save_request(request), (options[:test] || false))
         response
       end
+
       protected
 
       def upsified_location(location)
@@ -430,12 +431,11 @@ module ActiveMerchant
           if options[:tracking_numbers]
             root_node << XmlNode.new('ExpandedVoidShipment') do |expanded_node|
               expanded_node << XmlNode.new('ShipmentIdentificationNumber', options[:shipment_identification_number])
-                options[:tracking_numbers].each do |tracking_number|
-                  expanded_node << XmlNode.new('TrackingNumber', tracking_number)
-                end
+              options[:tracking_numbers].each do |tracking_number|
+                expanded_node << XmlNode.new('TrackingNumber', tracking_number)
               end
-          elsif
-            root_node << XmlNode.new('ShipmentIdentificationNumber', options[:shipment_identification_number])
+            end
+          elsif root_node << XmlNode.new('ShipmentIdentificationNumber', options[:shipment_identification_number])
           end
         end
         xml_request.to_s
@@ -532,7 +532,9 @@ module ActiveMerchant
         xml = REXML::Document.new(response)
         success = response_success?(xml)
         message = response_message(xml)
-        options = {}
+        options = {
+              xml_response: response
+        }
 
         if success
           options.update(
@@ -550,7 +552,9 @@ module ActiveMerchant
         xml = REXML::Document.new(response)
         success = response_success?(xml)
         message = response_message(xml)
-        options = {}
+        options = {
+              xml_response: response
+        }
 
         if success
           packages = []

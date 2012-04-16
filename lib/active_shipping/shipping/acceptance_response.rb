@@ -2,13 +2,14 @@ module ActiveMerchant #:nodoc:
   module Shipping
 
     class AcceptanceResponse < Response
-      attr_reader :total_cost, :shipment_identification_number, :packages, :high_value_report
+      attr_reader :total_cost, :shipment_identification_number, :packages, :high_value_report, :xml_response
 
       def initialize(success, message, params = {}, options = {})
         @total_cost = options[:total_cost]
         @shipment_identification_number = options[:shipment_identification_number]
         @packages = options[:packages]
         @high_value_report = (options[:high_value_report].empty?)? nil : options[:high_value_report]
+        @xml_response = options[:xml_response]
         super
       end
 
