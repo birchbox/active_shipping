@@ -386,12 +386,27 @@ module ActiveMerchant
                   dimensions << XmlNode.new('Height', package.inches(:height))
                   dimensions << XmlNode.new('Width', package.in(:width))
                 end
-                if package.value
+                if package.dry_ice_weight || package.value
                   package_node << XmlNode.new('PackageServiceOptions') do |package_service_options|
-                    package_service_options << XmlNode.new('InsuredValue') do |insured_value|
-                      insured_value << XmlNode.new('CurrencyCode', 'USD')
-                      value = (BigDecimal.new(package.value.to_s) / 100).round(2).to_s('F')
-                      insured_value << XmlNode.new('MonetaryValue', value)
+                    if package.value
+                      package_service_options << XmlNode.new('InsuredValue') do |insured_value|
+                        insured_value << XmlNode.new('CurrencyCode', 'USD')
+                        value = (BigDecimal.new(package.value.to_s) / 100).round(2).to_s('F')
+                        insured_value << XmlNode.new('MonetaryValue', value)
+                      end
+                    end
+
+                    if package.dry_ice_weight
+                      package_service_options << XmlNode.new('DryIce') do |dry_ice|
+                        dry_ice << XmlNode.new('RegulationSet','CFR')
+                        dry_ice << XmlNode.new('DryIceWeight') do |dry_ice_weight|
+                          dry_ice_weight << XmlNode.new('UnitOfMeasurement') do |unit_of_measurement|
+                            unit = (package.options[:units] == :imperial) ? 'LBS' : 'KGS'
+                            unit_of_measurement << XmlNode.new('Code', unit)
+                          end
+                          dry_ice_weight << XmlNode.new('Weight', package.dry_ice_weight)
+                        end
+                      end
                     end
                   end
                 end

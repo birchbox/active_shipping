@@ -178,6 +178,18 @@ class UPSTest < Test::Unit::TestCase
     assert_not_equal prices_of.call(:fake_google_as_commercial), prices_of.call(:fake_google_as_residential)
   end
 
+  def test_confirmation_with_dry_ice
+    account_number = fixtures(:ups)[:account]
+
+    confirmation_options = TestFixtures.confirmation_request_options account_number, [@packages[:perishable_wii]]
+
+    assert_nothing_raised do
+      @confirmation_response = @carrier.get_confirmation_response(confirmation_options)
+    end
+
+    assert_equal true, @confirmation_response.success?
+  end
+
   def test_confirmation
     account_number = fixtures(:ups)[:account]
 
