@@ -577,7 +577,8 @@ module ActiveMerchant
           xml.elements.each('/*/ShipmentResults/PackageResults') do |package|
             packages << {
                   tracking_number: package.get_text('TrackingNumber').to_s,
-                  image_data: Base64.decode64(package.get_text('LabelImage/GraphicImage').to_s)
+                  image_data: Base64.decode64(package.get_text('LabelImage/GraphicImage').to_s),
+                  label_html: Base64.decode64(package.get_text('LabelImage/HTMLImage').to_s)
             }
           end
 
