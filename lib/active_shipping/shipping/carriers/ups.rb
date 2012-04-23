@@ -610,8 +610,21 @@ module ActiveMerchant
         success = response_success?(xml)
         message = response_message(xml)
         options = {
-          xml_response: response
+          xml: response
         }
+
+        indicator_node = xml.find_first_recursive { |node| node.name.match /(?:(?:Valid|Ambiguous)Address|NoCandidates)Indicator/ }
+        indicator = case indicator_node.name
+          when 'ValidAddressIndicator'     then :valid
+          when 'AmbiguousAddressIndicator' then :ambiguous
+          when 'NoCandidatesIndicator'     then :no_candidates
+        end
+
+        options.update(
+          {
+            indicator: indicator
+          }
+        )
 
         AddressValidationResponse.new(success, message, Hash.from_xml(response).values.first, options)
       end

@@ -2,8 +2,10 @@ module ActiveMerchant #:nodoc:
   module Shipping
 
     class AddressValidationResponse < Response
+      attr_reader :indicator
+
       def initialize(success, message, params = {}, options = {})
-        @xml_response = options[:xml_response]
+        @indicator = options[:indicator]
         super
       end
     end

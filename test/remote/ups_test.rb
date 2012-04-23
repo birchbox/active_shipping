@@ -247,5 +247,6 @@ class UPSTest < Test::Unit::TestCase
     response = @carrier.get_address_validation_response TestFixtures.address_validation_request_options
 
     assert_equal true, response.success?
+    assert_equal :valid, response.indicator
   end
 end
