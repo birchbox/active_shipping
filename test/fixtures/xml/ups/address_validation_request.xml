@@ -1,0 +1,14 @@
+<AddressValidationRequest>
+  <Request>
+    <RequestAction>XAV</RequestAction>
+  </Request>
+  <AddressKeyFormat>
+    <ConsigneeName>Bob Bobsen</ConsigneeName>
+    <AddressLine>780 3rd Avenue</AddressLine>
+    <AddressLine>Suite  2601</AddressLine>
+    <PoliticalDivision2>New York</PoliticalDivision2>
+    <PoliticalDivision1>NY</PoliticalDivision1>
+    <PostcodePrimaryLow>10017</PostcodePrimaryLow>
+    <CountryCode>US</CountryCode>
+  </AddressKeyFormat>
+</AddressValidationRequest>

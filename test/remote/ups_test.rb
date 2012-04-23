@@ -242,4 +242,10 @@ class UPSTest < Test::Unit::TestCase
     xml = REXML::Document.new(void_response)
     assert_equal '1', xml.get_text('/*/Response/ResponseStatusCode').to_s
   end
+
+  def test_address_validation
+    response = @carrier.get_address_validation_response TestFixtures.address_validation_request_options
+
+    assert_equal true, response.success?
+  end
 end

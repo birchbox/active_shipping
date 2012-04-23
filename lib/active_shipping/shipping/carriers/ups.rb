@@ -17,7 +17,8 @@ module ActiveMerchant
             :track => 'ups.app/xml/Track',
             :ship_confirm => 'ups.app/xml/ShipConfirm',
             :ship_accept => 'ups.app/xml/ShipAccept',
-            :ship_void => 'ups.app/xml/Void'
+            :ship_void => 'ups.app/xml/Void',
+            :address_validation => 'ups.app/xml/XAV'
       }
 
       PICKUP_CODES = HashWithIndifferentAccess.new({
@@ -142,6 +143,15 @@ module ActiveMerchant
         request = "<?xml version='1.0'?>#{access_request}<?xml version='1.0'?>#{void_request}"
         response = commit(:ship_void, save_request(request), (options[:test] || false))
         response
+      end
+
+      def get_address_validation_response(options)
+        options = @options.update(options)
+        access_request = build_access_request
+        address_validation_request = build_address_validation_request(options)
+        request = "<?xml version='1.0'?>#{access_request}<?xml version='1.0'?>#{address_validation_request}"
+        response = commit(:address_validation, save_request(request), (options[:test] || false))
+        parse_address_validation_response(response)
       end
 
       protected
@@ -595,6 +605,17 @@ module ActiveMerchant
         AcceptanceResponse.new(success, message, Hash.from_xml(response).values.first, options)
       end
 
+      def parse_address_validation_response(response)
+        xml = REXML::Document.new(response)
+        success = response_success?(xml)
+        message = response_message(xml)
+        options = {
+          xml_response: response
+        }
+
+        AddressValidationResponse.new(success, message, Hash.from_xml(response).values.first, options)
+      end
+
       def location_from_address_node(address)
         return nil unless address
         Location.new(
@@ -634,6 +655,28 @@ module ActiveMerchant
 
         name ||= OTHER_NON_US_ORIGIN_SERVICES[code] unless name == 'US'
         name ||= DEFAULT_SERVICES[code]
+      end
+
+      def build_address_validation_request options
+        location = options[:location]
+
+        xml_request = XmlNode.new('AddressValidationRequest') do |root_node|
+          root_node << XmlNode.new('Request') do |request|
+            request << XmlNode.new('RequestAction', 'XAV')
+          end
+
+          root_node << XmlNode.new('AddressKeyFormat') do |format|
+            format << XmlNode.new('ConsigneeName', location.name)
+            format << XmlNode.new('AddressLine', location.address1)
+            format << XmlNode.new('AddressLine', location.address2)
+            format << XmlNode.new('PoliticalDivision2', location.city)
+            format << XmlNode.new('PoliticalDivision1', location.state)
+            format << XmlNode.new('PostcodePrimaryLow', location.postal_code)
+            format << XmlNode.new('CountryCode', location.country_code)
+          end
+        end
+
+        xml_request.to_s
       end
     end
   end

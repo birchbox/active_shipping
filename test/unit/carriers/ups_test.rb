@@ -14,6 +14,7 @@ class UPSTest < Test::Unit::TestCase
     @confirmation_request_options = TestFixtures.confirmation_request_options
     @acceptance_request_options = TestFixtures.acceptance_request_options
     @void_request_options = TestFixtures.void_request_options
+    @address_validation_request_options = TestFixtures.address_validation_request_options
   end
 
   def remove_human_spaces_from_xml(xml)
@@ -180,5 +181,10 @@ class UPSTest < Test::Unit::TestCase
   def test_build_void_request_expanded
     void_request = remove_human_spaces_from_xml(xml_fixture('ups/void_request_expanded'))
     assert_equal void_request, @carrier.send(:build_void_request, @void_request_options[:expanded])
+  end
+
+  def test_build_address_validation_request
+    address_validation_request = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_request'))
+    assert_equal address_validation_request, @carrier.send(:build_address_validation_request, @address_validation_request_options)
   end
 end
