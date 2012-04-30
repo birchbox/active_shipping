@@ -1,1 +1,19 @@
-<?xml version="1.0"?><AddressValidationResponse><Response><TransactionReference></TransactionReference><ResponseStatusCode>1</ResponseStatusCode><ResponseStatusDescription>Success</ResponseStatusDescription></Response><ValidAddressIndicator/><AddressKeyFormat><AddressLine>780 3RD AVE</AddressLine><AddressLine>RM 2601</AddressLine><Region>NEW YORK NY 10017-2177</Region><PoliticalDivision2>NEW YORK</PoliticalDivision2><PoliticalDivision1>NY</PoliticalDivision1><PostcodePrimaryLow>10017</PostcodePrimaryLow><PostcodeExtendedLow>2177</PostcodeExtendedLow><CountryCode>US</CountryCode></AddressKeyFormat></AddressValidationResponse>
+<?xml version="1.0"?>
+<AddressValidationResponse>
+	<Response>
+		<TransactionReference/>
+		<ResponseStatusCode>1</ResponseStatusCode>
+		<ResponseStatusDescription>Success</ResponseStatusDescription>
+	</Response>
+	<ValidAddressIndicator/>
+	<AddressKeyFormat>
+		<AddressLine>780 3RD AVE</AddressLine>
+		<AddressLine>RM 2601</AddressLine>
+		<Region>NEW YORK NY 10017-2177</Region>
+		<PoliticalDivision2>NEW YORK</PoliticalDivision2>
+		<PoliticalDivision1>NY</PoliticalDivision1>
+		<PostcodePrimaryLow>10017</PostcodePrimaryLow>
+		<PostcodeExtendedLow>2177</PostcodeExtendedLow>
+		<CountryCode>US</CountryCode>
+	</AddressKeyFormat>
+</AddressValidationResponse>

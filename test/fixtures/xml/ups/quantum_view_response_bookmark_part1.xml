@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<QuantumViewResponse>
+  <Response>
+    <TransactionReference/>
+    <ResponseStatusCode>1</ResponseStatusCode>
+    <ResponseStatusDescription>Success</ResponseStatusDescription>
+  </Response>
+  <Bookmark>mybookmarkhere</Bookmark>
+  <QuantumViewEvents>
+    <SubscriberID>SubScriptAll</SubscriberID>
+    <SubscriptionEvents>
+      <Name>OutboundFull</Name>
+      <Number>45BD09FCCEEA27BA</Number>
+      <SubscriptionStatus>
+        <Code>A</Code>
+        <Description>Active</Description>
+      </SubscriptionStatus>
+      <SubscriptionFile>
+        <FileName>070827_133055002</FileName>
+        <StatusType>
+          <Code>U</Code>
+          <Description>Unread</Description>
+        </StatusType>
+        <Origin>
+          <PackageReferenceNumber>
+            <Code>00</Code>
+            <Value>QAST ROW PKG 01</Value>
+          </PackageReferenceNumber>
+          <PackageReferenceNumber>
+            <Code>33</Code>
+            <Value>12345</Value>
+          </PackageReferenceNumber>
+          <ShipmentReferenceNumber>
+            <Code>00</Code>
+            <Value>04ROW01</Value>
+          </ShipmentReferenceNumber>
+          <ShipperNumber>QVDR01</ShipperNumber>
+          <TrackingNumber>1ZQVDR017890823000</TrackingNumber>
+          <Date>20070924</Date>
+          <Time>101200</Time>
+          <ActivityLocation>
+            <AddressArtifactFormat>
+              <PoliticalDivision2>ROSWELL-ROSWELL</PoliticalDivision2>
+              <PoliticalDivision1>GA</PoliticalDivision1>
+              <CountryCode>US</CountryCode>
+            </AddressArtifactFormat>
+          </ActivityLocation>
+          <BillToAccount>
+            <Option>03</Option>
+            <Number>QVDR03</Number>
+          </BillToAccount>
+        </Origin>
+      </SubscriptionFile>
+    </SubscriptionEvents>
+  </QuantumViewEvents>
+</QuantumViewResponse>

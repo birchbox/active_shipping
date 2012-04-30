@@ -18,7 +18,8 @@ module ActiveMerchant
             :ship_confirm => 'ups.app/xml/ShipConfirm',
             :ship_accept => 'ups.app/xml/ShipAccept',
             :ship_void => 'ups.app/xml/Void',
-            :address_validation => 'ups.app/xml/XAV'
+            :address_validation => 'ups.app/xml/XAV',
+            :quantum_view => 'ups.app/xml/QVEvents'
       }
 
       PICKUP_CODES = HashWithIndifferentAccess.new({
@@ -152,6 +153,28 @@ module ActiveMerchant
         request = "<?xml version='1.0'?>#{access_request}<?xml version='1.0'?>#{address_validation_request}"
         response = commit(:address_validation, save_request(request), (options[:test] || false))
         parse_address_validation_response(response)
+      end
+
+      def get_quantum_view_response
+        access_request = build_access_request
+
+        acc_shipped_info = {}
+        bookmark = nil
+
+        while true
+          options = (bookmark) ? {bookmark: bookmark} : {}
+          request = "<?xml version='1.0'?>#{access_request}<?xml version='1.0'?>#{build_quantum_view_request(options)}"
+          response = commit(:quantum_view, save_request(request), (@options[:test] || false))
+
+          quantum_view_response = parse_quantum_view_response(response)
+          acc_shipped_info.update(quantum_view_response.shipped_info)
+
+          bookmark = quantum_view_response.bookmark
+          break unless bookmark
+        end
+
+        quantum_view_response.shipped_info = acc_shipped_info
+        quantum_view_response
       end
 
       protected
@@ -408,7 +431,7 @@ module ActiveMerchant
 
                     if package.dry_ice_weight
                       package_service_options << XmlNode.new('DryIce') do |dry_ice|
-                        dry_ice << XmlNode.new('RegulationSet','CFR')
+                        dry_ice << XmlNode.new('RegulationSet', 'CFR')
                         dry_ice << XmlNode.new('DryIceWeight') do |dry_ice_weight|
                           dry_ice_weight << XmlNode.new('UnitOfMeasurement') do |unit_of_measurement|
                             unit = (package.options[:units] == :imperial) ? 'LBS' : 'KGS'
@@ -467,8 +490,6 @@ module ActiveMerchant
       end
 
       def parse_rate_response(origin, destination, packages, response, options={})
-        rates = []
-
         xml = REXML::Document.new(response)
         success = response_success?(xml)
         message = response_message(xml)
@@ -610,23 +631,48 @@ module ActiveMerchant
         success = response_success?(xml)
         message = response_message(xml)
         options = {
-          xml: response
+              xml: response
         }
 
         indicator_node = xml.find_first_recursive { |node| node.name.match /(?:(?:Valid|Ambiguous)Address|NoCandidates)Indicator/ }
         indicator = case indicator_node.name
-          when 'ValidAddressIndicator'     then :valid
-          when 'AmbiguousAddressIndicator' then :ambiguous
-          when 'NoCandidatesIndicator'     then :no_candidates
+          when 'ValidAddressIndicator' then
+            :valid
+          when 'AmbiguousAddressIndicator' then
+            :ambiguous
+          when 'NoCandidatesIndicator' then
+            :no_candidates
         end
 
         options.update(
-          {
-            indicator: indicator
-          }
+              {
+                    indicator: indicator
+              }
         )
 
         AddressValidationResponse.new(success, message, Hash.from_xml(response).values.first, options)
+      end
+
+      def parse_quantum_view_response(response)
+        xml = REXML::Document.new(response)
+        success = response_success?(xml)
+        message = response_message(xml)
+        options = {
+              xml: response
+        }
+
+        shipped_info = {}
+        xml.elements.each('/*/QuantumViewEvents/SubscriptionEvents/SubscriptionFile/Origin') do |origin|
+          tracking_number = origin.get_text('TrackingNumber').to_s
+          date = origin.get_text('Date').to_s
+          time = origin.get_text('Time').to_s
+          shipped_info[tracking_number] = DateTime.parse("#{date}#{time}")
+        end
+
+        bookmark = (xml.get_text('/*/Bookmark')) ? xml.get_text('/*/Bookmark').to_s : nil
+        options.update(shipped_info: shipped_info,
+                       bookmark: bookmark)
+        QuantumViewResponse.new(success, message, Hash.from_xml(response).values.first, options)
       end
 
       def location_from_address_node(address)
@@ -686,6 +732,19 @@ module ActiveMerchant
             format << XmlNode.new('PoliticalDivision1', location.state)
             format << XmlNode.new('PostcodePrimaryLow', location.postal_code)
             format << XmlNode.new('CountryCode', location.country_code)
+          end
+        end
+
+        xml_request.to_s
+      end
+
+      def build_quantum_view_request(options={})
+        xml_request = XmlNode.new('QuantumViewRequest') do |root_node|
+          root_node << XmlNode.new('Request') do |request|
+            request << XmlNode.new('RequestAction', 'QVEvents')
+          end
+          if options[:bookmark]
+            root_node << XmlNode.new('Bookmark', options[:bookmark])
           end
         end
 

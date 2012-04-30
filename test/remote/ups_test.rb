@@ -249,4 +249,12 @@ class UPSTest < Test::Unit::TestCase
     assert_equal true, response.success?
     assert_equal :valid, response.indicator
   end
+
+  def test_quantum_view
+    assert_nothing_raised do
+      @quantum_view_response = @carrier.get_quantum_view_response
+    end
+
+    assert_equal true, @quantum_view_response.success?
+  end
 end

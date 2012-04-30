@@ -7,7 +7,8 @@ class UPSTest < Test::Unit::TestCase
     @carrier = UPS.new(
           :key => 'key',
           :login => 'login',
-          :password => 'password'
+          :password => 'password',
+          :test => true
     )
     @tracking_response = xml_fixture('ups/shipment_from_tiger_direct')
 
@@ -103,7 +104,7 @@ class UPSTest < Test::Unit::TestCase
     confirmation_request = remove_human_spaces_from_xml(xml_fixture('ups/shipment_confirm_request_dry_ice'))
     assert_equal confirmation_request, @carrier.send(:build_confirmation_request,
                                                      TestFixtures.confirmation_request_options(
-                                                       account_number = '123456', [@packages[:perishable_wii]]))
+                                                           account_number = '123456', [@packages[:perishable_wii]]))
   end
 
   def test_build_confirmation_request_without_package_values
@@ -186,5 +187,59 @@ class UPSTest < Test::Unit::TestCase
   def test_build_address_validation_request
     address_validation_request = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_request'))
     assert_equal address_validation_request, @carrier.send(:build_address_validation_request, @address_validation_request_options)
+  end
+
+  def test_build_quantum_view_request
+    quantum_view_request = remove_human_spaces_from_xml(xml_fixture('ups/quantum_view_request'))
+    assert_equal quantum_view_request, @carrier.send(:build_quantum_view_request)
+
+    quantum_view_request = remove_human_spaces_from_xml(xml_fixture('ups/quantum_view_request_with_bookmark'))
+    assert_equal quantum_view_request, @carrier.send(:build_quantum_view_request, {bookmark: 'mybookmarkhere'})
+  end
+
+
+  def test_parse_quantum_view_response
+    quantum_view_response = remove_human_spaces_from_xml(xml_fixture('ups/quantum_view_response'))
+    parsed_response = @carrier.send(:parse_quantum_view_response, quantum_view_response)
+
+    assert_equal 'ActiveMerchant::Shipping::QuantumViewResponse', parsed_response.class.name
+    assert_equal true, parsed_response.success?
+    shipped_info = {
+          '1ZQVDR017890823915' => DateTime.new(2007, 8, 24, 10, 10, 0),
+          '1ZQVDR017890823000' => DateTime.new(2007, 9, 24, 10, 12, 0)
+    }
+    assert_equal shipped_info, parsed_response.shipped_info
+    assert_equal 'mybookmarkhere', parsed_response.bookmark
+  end
+
+  def test_get_quantum_view_response_with_bookmark
+    options = @carrier.instance_variable_get("@options")
+    access_request = "<AccessRequest><AccessLicenseNumber>#{options[:key]}</AccessLicenseNumber><UserId>#{options[:login]}</UserId><Password>#{options[:password]}</Password></AccessRequest>"
+
+    quantum_view_request_part1 = "<QuantumViewRequest><Request><RequestAction>QVEvents</RequestAction></Request></QuantumViewRequest>"
+    request_part1 = "<?xml version='1.0'?>#{access_request}<?xml version='1.0'?>#{quantum_view_request_part1}"
+    quantum_view_response_bookmark_part1 = remove_human_spaces_from_xml(xml_fixture('ups/quantum_view_response_bookmark_part1'))
+
+    @carrier.expects(:commit).
+          with(:quantum_view, request_part1, true).
+          returns(quantum_view_response_bookmark_part1)
+
+    quantum_view_request_part2 = "<QuantumViewRequest><Request><RequestAction>QVEvents</RequestAction></Request><Bookmark>mybookmarkhere</Bookmark></QuantumViewRequest>"
+    request_part2 = "<?xml version='1.0'?>#{access_request}<?xml version='1.0'?>#{quantum_view_request_part2}"
+    quantum_view_response_bookmark_part2 = remove_human_spaces_from_xml(xml_fixture('ups/quantum_view_response_bookmark_part2'))
+
+    @carrier.expects(:commit).
+          with(:quantum_view, request_part2, true).
+          returns(quantum_view_response_bookmark_part2)
+
+    quantum_view_response = @carrier.get_quantum_view_response
+
+    assert_equal 'ActiveMerchant::Shipping::QuantumViewResponse', quantum_view_response.class.name
+    assert_equal true, quantum_view_response.success?
+    shipped_info = {
+          '1ZQVDR017890823000' => DateTime.new(2007, 9, 24, 10, 12, 0),
+          '1ZQVDR017890823001' => DateTime.new(2007, 9, 25, 10, 15, 0)
+    }
+    assert_equal shipped_info, quantum_view_response.shipped_info
   end
 end

@@ -1,0 +1,6 @@
+<QuantumViewRequest>
+  <Request>
+    <RequestAction>QVEvents</RequestAction>
+  </Request>
+  <Bookmark>mybookmarkhere</Bookmark>
+</QuantumViewRequest>
