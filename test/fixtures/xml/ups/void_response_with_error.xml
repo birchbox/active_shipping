@@ -1,0 +1,16 @@
+<VoidShipmentResponse>
+  <Response>
+    <TransactionReference>
+      <CustomerContext>Customer Comment</CustomerContext>
+      <XpciVersion>1.0</XpciVersion>
+    </TransactionReference>
+    <ResponseStatusCode>1</ResponseStatusCode>
+    <ResponseStatusDescription>Success</ResponseStatusDescription>
+  </Response>
+  <Status>
+    <StatusType>
+      <Code>0</Code>
+      <Description>Failure</Description>
+    </StatusType>
+  </Status>
+</VoidShipmentResponse>

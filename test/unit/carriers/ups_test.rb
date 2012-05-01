@@ -197,6 +197,20 @@ class UPSTest < Test::Unit::TestCase
     assert_equal quantum_view_request, @carrier.send(:build_quantum_view_request, {bookmark: 'mybookmarkhere'})
   end
 
+  def test_parse_void_response
+    void_response = remove_human_spaces_from_xml(xml_fixture('ups/void_response'))
+    parsed_response = @carrier.send(:parse_void_response, void_response)
+
+    assert_equal true, parsed_response.success?
+    assert_equal true, parsed_response.voided_shipment?
+    assert_kind_of ActiveMerchant::Shipping::VoidResponse, parsed_response
+
+    void_response = remove_human_spaces_from_xml(xml_fixture('ups/void_response_with_error'))
+    parsed_response = @carrier.send(:parse_void_response, void_response)
+    assert_equal true, parsed_response.success?
+    assert_equal false, parsed_response.voided_shipment?
+  end
+
 
   def test_parse_quantum_view_response
     quantum_view_response = remove_human_spaces_from_xml(xml_fixture('ups/quantum_view_response'))
