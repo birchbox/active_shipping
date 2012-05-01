@@ -657,9 +657,7 @@ module ActiveMerchant
         xml = REXML::Document.new(response)
         success = response_success?(xml)
         message = response_message(xml)
-        options = {
-              xml: response
-        }
+        options = {}
 
         shipped_info = {}
         xml.elements.each('/*/QuantumViewEvents/SubscriptionEvents/SubscriptionFile/Origin') do |origin|
