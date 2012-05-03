@@ -1,3 +1,4 @@
+<AccessRequest><AccessLicenseNumber>123</AccessLicenseNumber><UserId>faa</UserId><Password>foo</Password></AccessRequest>
 <AddressValidationRequest>
   <Request>
     <RequestAction>XAV</RequestAction>
