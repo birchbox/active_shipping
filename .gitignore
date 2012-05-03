@@ -7,3 +7,4 @@ pkg
 Gemfile.lock
 *.idea
 test/fixtures.yml
+.bundle
