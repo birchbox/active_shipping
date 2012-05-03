@@ -668,6 +668,14 @@ module ActiveMerchant
             :no_candidates
         end
 
+        request_xml = REXML::Document.new(last_request)
+        old_zip = request_xml.get_text('/*/AddressKeyFormat/PostcodePrimaryLow').to_s
+        new_zip = xml.get_text('/*/AddressKeyFormat/PostcodePrimaryLow').to_s
+
+        if new_zip != old_zip
+          indicator = :no_candidates
+        end
+
         options.update(
           {
             indicator: indicator
