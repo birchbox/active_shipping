@@ -8,6 +8,11 @@ fedex:
   login: FedExAccountNumber
   password: FedExMeterNumber
   test: true
+periship:
+  key: PeriShipKey
+  login: PeriShipLogin
+  password: PeriShipPassword
+  test: true
 shipwire:
   login: EmailAddress
   password: Password
