@@ -9,6 +9,7 @@ module ActiveMerchant #:nodoc:
         @shipment_identification_number = options[:shipment_identification_number]
         @shipment_digest = options[:shipment_digest]
         @xml_response = options[:xml_response]
+        Rails.logger.error "XML RESPONSE: #{@xml_response}"
         super
       end
 
