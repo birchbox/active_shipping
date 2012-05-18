@@ -1,0 +1,96 @@
+<ShipmentConfirmRequest>
+  <Request>
+    <RequestAction>ShipConfirm</RequestAction>
+    <RequestOption>validate</RequestOption>
+  </Request>
+  <Shipment>
+    <Shipper>
+      <Name>Shipper</Name>
+      <PhoneNumber>4155555555</PhoneNumber>
+      <EMailAddress>shipper@example.com</EMailAddress>
+      <ShipperNumber>123456</ShipperNumber>
+      <Address>
+        <AddressLine1>1600 Amphitheatre Parkway</AddressLine1>
+        <City>Mountain View</City>
+        <StateProvinceCode>CA</StateProvinceCode>
+        <PostalCode>94043</PostalCode>
+        <CountryCode>US</CountryCode>
+      </Address>
+    </Shipper>
+    <ShipFrom>
+      <CompanyName>Depot Company</CompanyName>
+      <AttentionName>Joe Blow</AttentionName>
+      <PhoneNumber>4155556666</PhoneNumber>
+      <Address>
+        <AddressLine1>780 3rd Avenue</AddressLine1>
+        <AddressLine2>Suite  2601</AddressLine2>
+        <City>New York</City>
+        <StateProvinceCode>NY</StateProvinceCode>
+        <PostalCode>10017</PostalCode>
+        <CountryCode>US</CountryCode>
+      </Address>
+    </ShipFrom>
+    <ShipTo>
+      <CompanyName>Recipient Co</CompanyName>
+      <AttentionName>Joan Blow</AttentionName>
+      <PhoneNumber>4155553333</PhoneNumber>
+      <Address>
+        <AddressLine1>455 N. Rexford Dr.</AddressLine1>
+        <AddressLine2>3rd Floor</AddressLine2>
+        <City>Beverly Hills</City>
+        <StateProvinceCode>CA</StateProvinceCode>
+        <PostalCode>90210</PostalCode>
+        <CountryCode>US</CountryCode>
+      </Address>
+    </ShipTo>
+    <PaymentInformation>
+      <Prepaid>
+        <BillShipper>
+          <AccountNumber>123456</AccountNumber>
+        </BillShipper>
+      </Prepaid>
+    </PaymentInformation>
+    <Service>
+      <Code>02</Code>
+    </Service>
+    <Package>
+      <PackagingType>
+        <Code>02</Code>
+      </PackagingType>
+      <PackageWeight>
+        <UnitOfMeasurement>
+          <Code>LBS</Code>
+        </UnitOfMeasurement>
+        <Weight>7.5</Weight>
+      </PackageWeight>
+      <Dimensions>
+        <UnitOfMeasurement>
+          <Code>IN</Code>
+        </UnitOfMeasurement>
+        <Length>15</Length>
+        <Height>4.5</Height>
+        <Width>10</Width>
+      </Dimensions>
+      <PackageServiceOptions>
+        <DryIce>
+          <RegulationSet>CFR</RegulationSet>
+          <DryIceWeight>
+            <UnitOfMeasurement>
+              <Code>LBS</Code>
+            </UnitOfMeasurement>
+            <Weight>2</Weight>
+          </DryIceWeight>
+        </DryIce>
+      </PackageServiceOptions>
+    </Package>
+  </Shipment>
+  <LabelSpecification>
+    <LabelPrintMethod>
+      <Code>GIF</Code>
+    </LabelPrintMethod>
+    <HTTPUserAgent>Mozilla/4.5</HTTPUserAgent>
+    <LabelImageFormat>
+      <Code>GIF</Code>
+    </LabelImageFormat>
+  </LabelSpecification>
+</ShipmentConfirmRequest>
