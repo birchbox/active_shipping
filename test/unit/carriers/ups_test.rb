@@ -100,11 +100,18 @@ class UPSTest < Test::Unit::TestCase
     assert_equal confirmation_request, @carrier.send(:build_confirmation_request, @confirmation_request_options)
   end
 
-  def test_build_confirmation_request_dry_ice
-    confirmation_request = remove_human_spaces_from_xml(xml_fixture('ups/shipment_confirm_request_dry_ice'))
+  def test_build_confirmation_request_dry_ice_air_shipping
+    confirmation_request = remove_human_spaces_from_xml(xml_fixture('ups/shipment_confirm_request_dry_ice_air_shipping'))
     assert_equal confirmation_request, @carrier.send(:build_confirmation_request,
                                                      TestFixtures.confirmation_request_options(
                                                            account_number = '123456', [@packages[:perishable_wii]]))
+  end
+
+  def test_build_confirmation_request_dry_ice_ground_shipping
+    confirmation_request = remove_human_spaces_from_xml(xml_fixture('ups/shipment_confirm_request_dry_ice_ground_shipping'))
+    assert_equal confirmation_request, @carrier.send(:build_confirmation_request,
+                                                     TestFixtures.confirmation_request_options(
+                                                           account_number = '123456', [@packages[:perishable_wii]], '03'))
   end
 
   def test_build_confirmation_request_without_package_values

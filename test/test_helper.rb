@@ -188,7 +188,7 @@ module ActiveMerchant
                   :postal_code => '6011')
       }
 
-      def self.confirmation_request_options(account_number = '123456', packages = nil)
+      def self.confirmation_request_options(account_number = '123456', packages = nil, service_code = '02')
         packages ||= [@@packages[:wii]]
 
         {
@@ -214,7 +214,7 @@ module ActiveMerchant
                     address: @@locations[:beverly_hills]
               },
 
-              service_code: '02',
+              service_code: service_code,
 
               packages: packages
         }

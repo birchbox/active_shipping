@@ -51,7 +51,7 @@
       </Prepaid>
     </PaymentInformation>
     <Service>
-      <Code>02</Code>
+      <Code>03</Code>
     </Service>
     <Package>
       <PackagingType>
@@ -71,17 +71,6 @@
         <Height>4.5</Height>
         <Width>10</Width>
       </Dimensions>
-      <PackageServiceOptions>
-        <DryIce>
-          <RegulationSet>CFR</RegulationSet>
-          <DryIceWeight>
-            <UnitOfMeasurement>
-              <Code>LBS</Code>
-            </UnitOfMeasurement>
-            <Weight>2</Weight>
-          </DryIceWeight>
-        </DryIce>
-      </PackageServiceOptions>
     </Package>
   </Shipment>
   <LabelSpecification>
