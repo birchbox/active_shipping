@@ -668,9 +668,9 @@ module ActiveMerchant
         end
 
         %w(PostcodePrimaryLow PoliticalDivision1 PoliticalDivision2).each do |attr|
-          old = last_request.match(/<#{attr}>(.+)<\/#{attr}>/)[1].strip
-          new = xml.get_text("/*/AddressKeyFormat/#{attr}").to_s.strip
-          indicator = :no_candidates if (old.casecmp(new) != 0)
+          from_request = last_request.match(/<#{attr}>(.+)<\/#{attr}>/)[1].downcase.split
+          from_response = xml.get_text("/*/AddressKeyFormat/#{attr}").to_s.downcase.split
+          indicator = :no_candidates if from_request!= from_response
         end
 
         options.update(

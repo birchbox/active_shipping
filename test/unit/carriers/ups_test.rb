@@ -261,6 +261,19 @@ class UPSTest < Test::Unit::TestCase
     assert_equal :no_candidates, parsed_response.indicator
   end
 
+  def test_parse_address_response_with_extra_spaces_and_mixed_cases
+    request = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_request_extra_spaces'))
+    @carrier.send(:save_request, request)
+    address_validation_response = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_response_real'))
+
+    parsed_response = @carrier.send(:parse_address_validation_response, address_validation_response)
+
+    assert_equal true, parsed_response.success?
+    assert_equal :valid, parsed_response.indicator
+  end
+
+
+
   def test_parse_quantum_view_response
     quantum_view_response = remove_human_spaces_from_xml(xml_fixture('ups/quantum_view_response'))
     parsed_response = @carrier.send(:parse_quantum_view_response, quantum_view_response)
