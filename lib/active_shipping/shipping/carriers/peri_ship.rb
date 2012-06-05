@@ -18,6 +18,7 @@ module ActiveMerchant
           "1" => FedEx::ServiceTypes["PRIORITY_OVERNIGHT"],
           "3" => FedEx::ServiceTypes["FEDEX_2_DAY"],
           "5" => FedEx::ServiceTypes["STANDARD_OVERNIGHT"],
+          "6" => FedEx::ServiceTypes["FIRST_OVERNIGHT"],
           "20" => FedEx::ServiceTypes["FEDEX_EXPRESS_SAVER"],
           "90" => FedEx::ServiceTypes["GROUND_HOME_DELIVERY"],
           "92" => FedEx::ServiceTypes["FEDEX_GROUND"]
@@ -47,29 +48,20 @@ module ActiveMerchant
         options = @options.merge(options)
         packages = Array(packages)
 
-        package_nodes = create_package_nodes(packages, options)
-        rate_template = build_rate_request_template(origin, destination, packages, options)
+        # PeriShip rates API requires a unique call for each package in a shipment - thus the calling and merging gyrations
 
-        x = Time.now
-        response = nil
-        rate_estimates = nil
+        package_nodes = create_package_nodes(packages, options)
+        rate_template = build_rate_request_template(origin, destination, options)
+
+        rate_responses = []
 
         package_nodes.each do |package|
           rate_request = build_rate_request(rate_template, package, options)
-          y = Time.now
-          new_response = commit(:rates, save_request(rate_request))
-          puts 'Individual Time: ', Time.now - y
-
-          #TODO: refactor to merge rates in parse_rate_response
-          new_response = parse_rate_response(origin, destination, packages, new_response, options)
-
-          rate_estimates = merge_rate_estimates(rate_estimates, new_response.rates)
-          #TODO: create correct response
-          response = new_response
+          response = commit(:rates, rate_request)
+          rate_responses << parse_rate_response(origin, destination, package, response, options)
         end
 
-        puts 'Total Time: ', Time.now - x
-        response
+        combine_rate_responses(rate_responses, packages)
       end
 
       protected
@@ -86,7 +78,7 @@ module ActiveMerchant
         end
       end
 
-      def build_rate_request_template(origin, destination, packages, options={})
+      def build_rate_request_template(origin, destination, options={})
         xml_request = XmlNode.new('PeriShipRateRequest') do |root_node|
 
           root_node << XmlNode.new('RequestHeader') do |access_request|
@@ -96,7 +88,7 @@ module ActiveMerchant
           end
 
           root_node << XmlNode.new('RecipientInfo') do |recipient_info|
-            #recipient_info << XmlNode.new("RecipientName", options[:attention_name])
+            recipient_info << XmlNode.new("RecipientName", options[:attention_name])
             recipient_info << XmlNode.new("RecipientStreet", destination.address1)
             recipient_info << XmlNode.new("RecipientCity", destination.city)
             recipient_info << XmlNode.new("RecipientState", destination.province)
@@ -149,54 +141,69 @@ module ActiveMerchant
         xml_request
       end
 
-      def parse_rate_response(origin, destination, packages, response, options={})
-        rate_estimates = []
-
+      def parse_rate_response(origin, destination, package, response, options={})
         xml = REXML::Document.new(response)
 
-        success = response_success?(xml)
-        message = response_message(xml)
-
-        if success
+        if response_success?(xml)
           rate_estimates = []
-
           xml.elements.each('/*/ServiceItem') do |service_item|
             service_code = service_item.get_text('ServiceCode').to_s
             days_to_delivery = service_item.get_text('daysInTransit').to_s.to_i
             delivery_date = (days_to_delivery.between?(0, 99)) ? days_to_delivery.days.from_now.strftime("%Y-%m-%d") : nil
-
-            rate_estimates << RateEstimate.new(origin, destination, @@name,
-                                               :service_name => DEFAULT_SERVICES[service_code],
+            rate_estimates << RateEstimate.new(origin,
+                                               destination,
+                                               @@name,
+                                               DEFAULT_SERVICES[service_code],
                                                :total_price => service_item.get_text('TotalFee').to_s.to_f,
                                                :currency => 'USD',
                                                :service_code => service_code,
-                                               :packages => packages,
+                                               :package => package,
                                                :delivery_range => [delivery_date])
+          end
+          RateResponse.new(true, "Success", Hash.from_xml(response), :rates => rate_estimates, :xml => response)
+        else
+          error_message = response_message(xml)
+          RateResponse.new(false, error_message, Hash.from_xml(response), :rates => rate_estimates, :xml => response)
+        end
+      end
 
+      def combine_rate_responses(rate_responses, packages)
+        #if there are any failed responses, return on that response
+
+        rate_responses.each do |r|
+          return r if !r.success?
+        end
+
+        #group rate estimates by delivery type so that we can exclude any incomplete delivery types
+        rate_estimate_delivery_types = {}
+
+        rate_responses.each do |rr|
+          rr.rate_estimates.each do |re|
+            (rate_estimate_delivery_types[re.service_code] ||= []) << re
           end
         end
 
-        RateResponse.new(success, message, Hash.from_xml(response).values.first, :rates => rate_estimates, :xml => response, :request => last_request)
-      end
+        rate_estimate_delivery_types.delete_if { |type, re| re.size != packages.size }
 
-      def merge_rate_estimates(rates, new_rate_estimates)
-        puts 'rates_in:', rates
+        #combine cost estimates for remaining packages
 
-        return new_rate_estimates if rates.nil?
+        combined_rate_estimates = []
 
-        cnt = 0
-        new_rate_estimates.each do |new_rate|
-          service_name = new_rate.service_name[:service_name]
-          service_rate = new_rate.service_name[:total_price]
-          puts 'new_service_name_in:', service_name, 'service_name_in', rates[cnt].service_name[:service_name]
-          puts 'new_service_total_in:', service_rate, 'service_total_in', rates[cnt].service_name[:total_price]
-          rates[cnt].service_name[:total_price] += new_rate.service_name[:total_price]
-          puts 'total_price_out:', rates[cnt].service_name[:total_price]
-          #cnt += 1
+        rate_estimate_delivery_types.each do |type, re|
+          total_price = re.sum(&:total_price)
+          r = re.first
+
+          combined_rate_estimates << RateEstimate.new(r.origin,
+                                                      r.destination,
+                                                      r.carrier,
+                                                      r.service_name,
+                                                      :total_price => total_price,
+                                                      :currency => r.currency,
+                                                      :service_code => r.service_code,
+                                                      :packages => packages,
+                                                      :delivery_range => r.delivery_range)
         end
-
-        puts 'rates_out:', rates
-
+        RateResponse.new(true, "Success", {}, :rates => combined_rate_estimates)
       end
 
       def response_success?(xml)
