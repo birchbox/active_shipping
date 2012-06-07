@@ -1,0 +1,25 @@
+<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<PeriShipRateResponse>
+  <ResponseHeader>
+    <ShipperZIPCode>90210</ShipperZIPCode>
+    <RecipientName></RecipientName>
+    <RecipientStreet>1600 AMPHITHEATRE PARKWAY</RecipientStreet>
+    <RecipientCity>MOUNTAIN VIEW</RecipientCity>
+    <RecipientState>CA</RecipientState>
+    <RecipientZIP>94043</RecipientZIP>
+    <Weight>4850</Weight>
+    <RecipientType>R</RecipientType>
+    <SignatureType></SignatureType>
+    <DeclaredValue></DeclaredValue>
+    <SaturdayDelivery></SaturdayDelivery>
+    <ShipDate></ShipDate>
+    <DryIce></DryIce>
+    <ErrorCount>1</ErrorCount>
+  </ResponseHeader>
+  <Errors>
+    <ErrorItem>
+      <ErrorCode>16</ErrorCode>
+      <ErrorDescription>Weight must be between 0 and 150 pounds.</ErrorDescription>
+    </ErrorItem>
+  </Errors>
+</PeriShipRateResponse>

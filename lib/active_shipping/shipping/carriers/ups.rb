@@ -667,11 +667,10 @@ module ActiveMerchant
             :no_candidates
         end
 
-        old_zip = last_request.match(/<PostcodePrimaryLow>(.+)<\/PostcodePrimaryLow>/)[1]
-        new_zip = xml.get_text('/*/AddressKeyFormat/PostcodePrimaryLow').to_s
-
-        if new_zip != old_zip
-          indicator = :no_candidates
+        %w(PostcodePrimaryLow PoliticalDivision1 PoliticalDivision2).each do |attr|
+          from_request = last_request.match(/<#{attr}>(.+)<\/#{attr}>/)[1].downcase.split
+          from_response = xml.get_text("/*/AddressKeyFormat/#{attr}").to_s.downcase.split
+          indicator = :no_candidates if from_request!= from_response
         end
 
         options.update(
