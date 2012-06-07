@@ -158,11 +158,12 @@ module ActiveMerchant
 
       def get_address_validation_response(options)
         options = @options.update(options)
+        options[:strict] = true unless options.has_key?(:strict)
         access_request = build_access_request
         address_validation_request = build_address_validation_request(options)
         request = "<?xml version='1.0'?>#{access_request}<?xml version='1.0'?>#{address_validation_request}"
         response = commit(:address_validation, save_request(request), (options[:test] || false))
-        parse_address_validation_response(response)
+        parse_address_validation_response(response, options[:strict])
       end
 
       def get_quantum_view_response
@@ -649,7 +650,7 @@ module ActiveMerchant
         VoidResponse.new(success, message, Hash.from_xml(response).values.first, options)
       end
 
-      def parse_address_validation_response(response)
+      def parse_address_validation_response(response, strict = true)
         xml = REXML::Document.new(response)
         success = response_success?(xml)
         message = response_message(xml)
@@ -667,10 +668,12 @@ module ActiveMerchant
             :no_candidates
         end
 
-        %w(PostcodePrimaryLow PoliticalDivision1 PoliticalDivision2).each do |attr|
-          from_request = last_request.match(/<#{attr}>(.+)<\/#{attr}>/)[1].downcase.split
-          from_response = xml.get_text("/*/AddressKeyFormat/#{attr}").to_s.downcase.split
-          indicator = :no_candidates if from_request!= from_response
+        if strict
+          %w(PostcodePrimaryLow PoliticalDivision1 PoliticalDivision2).each do |attr|
+            from_request = last_request.match(/<#{attr}>(.+)<\/#{attr}>/)[1].downcase.split
+            from_response = xml.get_text("/*/AddressKeyFormat/#{attr}").to_s.downcase.split
+            indicator = :no_candidates if from_request!= from_response
+          end
         end
 
         options.update(

@@ -228,6 +228,40 @@ class UPSTest < Test::Unit::TestCase
     assert_equal :valid, parsed_response.indicator
   end
 
+  def test_parse_address_response_with_invalid_zip_code_without_strict
+    request = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_request_invalid_zip'))
+    @carrier.send(:save_request, request)
+    address_validation_response = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_response_real'))
+
+    parsed_response = @carrier.send(:parse_address_validation_response, address_validation_response, false)
+
+    assert_equal true, parsed_response.success?
+    assert_equal :valid, parsed_response.indicator
+  end
+
+  def test_parse_address_response_with_invalid_state_without_strict
+    request = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_request_invalid_state'))
+    @carrier.send(:save_request, request)
+    address_validation_response = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_response_real'))
+
+    parsed_response = @carrier.send(:parse_address_validation_response, address_validation_response, false)
+
+    assert_equal true, parsed_response.success?
+    assert_equal :valid, parsed_response.indicator
+  end
+
+  def test_parse_address_response_with_invalid_city_without_strict
+    request = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_request_invalid_city'))
+    @carrier.send(:save_request, request)
+    address_validation_response = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_response_real'))
+
+    parsed_response = @carrier.send(:parse_address_validation_response, address_validation_response, false)
+
+    assert_equal true, parsed_response.success?
+    assert_equal :valid, parsed_response.indicator
+  end
+
+
   def test_parse_address_response_with_invalid_zip_code
     request = remove_human_spaces_from_xml(xml_fixture('ups/address_validation_request_invalid_zip'))
     @carrier.send(:save_request, request)
